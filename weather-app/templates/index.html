@@ -32,7 +32,9 @@ Dashboard
 
             <span class="dot live"></span>
 
-            Synchronisation...
+            <span id="sync-status">
+                Synchronisation...
+            </span>
 
         </p>
 
@@ -166,12 +168,12 @@ hPa
 
 <div class="history-head">
 
-<h2>
+<h2 id="chart-title">
 Temperature History
 </h2>
 
 
-<p class="history-meta">
+<p class="history-meta" id="chart-meta">
 Last measurements
 </p>
 
@@ -180,11 +182,18 @@ Last measurements
 
 
 
+<div class="metric-tabs metric-tabs--chart" id="metric-tabs"></div>
+
+
+
 <div class="chart-wrap">
 
 <canvas id="tempChart"></canvas>
 
 </div>
+
+
+<p class="chart-fallback" id="chart-fallback"></p>
 
 
 </section>
@@ -202,6 +211,11 @@ Refresh
 </button>
 
 
+<p class="auto-note">
+Auto-refresh every 60 s
+</p>
+
+
 </section>
 
 
@@ -210,7 +224,8 @@ Refresh
 
 
 
-<script src="/static/js/dashboard.js"></script>
+<script src="/static/js/metrics.js?v={{ asset_version }}"></script>
+<script src="/static/js/dashboard.js?v={{ asset_version }}"></script>
 
 
 {% endblock %}

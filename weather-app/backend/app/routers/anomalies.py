@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..services.anomaly_service import get_anomalies
 from ..schemas import AnomalyRequest
+from ..services.anomaly_service import get_anomalies
 
 
 router = APIRouter(
@@ -12,14 +12,14 @@ router = APIRouter(
 
 
 
-@router.put("/anomalies")
+@router.post("/anomalies")
 def anomalies(
-    request: AnomalyRequest,
+    payload: AnomalyRequest,
     db: Session = Depends(get_db)
 ):
 
     return get_anomalies(
-        db=db,
-        metric=request.metric,
-        threshold=request.threshold
+        db,
+        metric=payload.metric.value,
+        threshold=payload.threshold
     )

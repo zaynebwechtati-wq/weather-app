@@ -10,64 +10,96 @@ Forecast
 {% block content %}
 
 
-<h1>Weather Forecast</h1>
+<div class="station">
+
+
+<header class="masthead">
+
+    <p class="eyebrow">
+        Prévision
+        <span class="sep">·</span>
+        <span class="coords">moyenne mobile</span>
+    </p>
+
+
+    <div class="masthead-row">
+
+        <h1>
+            Weather Forecast
+        </h1>
+
+
+        <p class="sync">
+
+            <span class="dot live"></span>
+
+            <span id="forecast-status">
+                Loading...
+            </span>
+
+        </p>
+
+    </div>
+
+</header>
 
 
 
-<div class="controls">
+<section class="query-panel">
 
 
-    <label for="metric-select">
-        Select metric:
-    </label>
+    <div class="field">
+
+        <span class="field-label">
+            Metric
+        </span>
+
+        <div class="metric-tabs" id="metric-tabs"></div>
+
+    </div>
 
 
-    <select id="metric-select">
+    <div class="field field--narrow">
 
-        <option value="temperature">
-            Temperature
-        </option>
+        <label class="field-label" for="n-points">
+            Points
+        </label>
 
+        <input
+            class="field-input"
+            type="number"
+            id="n-points"
+            min="2"
+            max="100"
+            value="5"
+        >
 
-        <option value="humidity">
-            Humidity
-        </option>
-
-
-        <option value="windspeed">
-            Wind Speed
-        </option>
-
-
-        <option value="pressure">
-            Pressure
-        </option>
+    </div>
 
 
-    </select>
-
-
-
-    <button id="forecast-btn">
-        Get Forecast
+    <button class="btn" type="button" id="run-forecast">
+        Forecast
     </button>
 
 
+</section>
+
+
+
+<div id="forecast-data" class="readouts">
+
+    <div class="card empty">
+        Loading...
+    </div>
+
 </div>
 
 
-
-
-<div id="forecast-data" class="cards">
-
-    Select a metric...
-
 </div>
 
 
-
-
-<script src="/static/js/forecast.js"></script>
+<script src="/static/js/metrics.js?v={{ asset_version }}"></script>
+<script src="/static/js/forecast.js?v={{ asset_version }}"></script>
 
 
 {% endblock %}

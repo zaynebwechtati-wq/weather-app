@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+Collector Logs
+{% endblock %}
+
+
+
+{% block content %}
+
+
+<div class="station">
+
+
+<header class="masthead">
+
+    <p class="eyebrow">
+        Collecteur
+        <span class="sep">·</span>
+        <span class="coords">toutes les 10 minutes</span>
+    </p>
+
+
+    <div class="masthead-row">
+
+        <h1>
+            Collector Logs
+        </h1>
+
+
+        <p class="sync">
+
+            <span class="dot live"></span>
+
+            <span id="logs-status">
+                Loading...
+            </span>
+
+        </p>
+
+    </div>
+
+</header>
+
+
+
+<section class="query-panel">
+
+
+    <div class="field">
+
+        <span class="field-label">
+            Status
+        </span>
+
+        <div class="metric-tabs" id="status-tabs"></div>
+
+    </div>
+
+
+    <div class="field field--narrow">
+
+        <label class="field-label" for="log-limit">
+            Runs
+        </label>
+
+        <input
+            class="field-input"
+            type="number"
+            id="log-limit"
+            min="1"
+            max="500"
+            value="50"
+        >
+
+    </div>
+
+
+    <button class="btn" type="button" id="run-logs">
+        Load
+    </button>
+
+
+</section>
+
+
+
+<section class="stats" id="logs-summary"></section>
+
+
+
+<section class="history">
+
+
+    <div class="history-head">
+
+        <h2 id="logs-title">
+            Collector runs
+        </h2>
+
+        <p class="history-meta">
+            Newest first
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table class="readings-table">
+
+            <thead>
+                <tr>
+                    <th>Run at</th>
+                    <th>Status</th>
+                    <th class="num">Rows</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+
+            <tbody id="logs-rows">
+                <tr>
+                    <td colspan="4" class="empty">Loading...</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</section>
+
+
+</div>
+
+
+<script src="/static/js/metrics.js?v={{ asset_version }}"></script>
+<script src="/static/js/logs.js?v={{ asset_version }}"></script>
+
+
+{% endblock %}

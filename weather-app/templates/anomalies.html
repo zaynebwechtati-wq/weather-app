@@ -10,75 +10,95 @@ Anomalies
 {% block content %}
 
 
-<h1>
-    Weather Anomalies Detection
-</h1>
+<div class="station">
+
+
+<header class="masthead">
+
+    <p class="eyebrow">
+        Anomalies
+        <span class="sep">·</span>
+        <span class="coords">z-score</span>
+    </p>
+
+
+    <div class="masthead-row">
+
+        <h1>
+            Weather Anomalies Detection
+        </h1>
+
+
+        <p class="sync">
+
+            <span class="dot live"></span>
+
+            <span id="anomalies-status">
+                Checking...
+            </span>
+
+        </p>
+
+    </div>
+
+</header>
 
 
 
-<div class="controls">
+<section class="query-panel">
 
 
-    <label for="metric-select">
-        Select metric:
-    </label>
+    <div class="field">
+
+        <span class="field-label">
+            Metric
+        </span>
+
+        <div class="metric-tabs" id="metric-tabs"></div>
+
+    </div>
 
 
+    <div class="field field--narrow">
 
-    <select id="metric-select">
+        <label class="field-label" for="threshold">
+            Threshold
+        </label>
 
+        <input
+            class="field-input"
+            type="number"
+            id="threshold"
+            min="0.1"
+            max="10"
+            step="0.1"
+            value="2"
+        >
 
-        <option value="temperature">
-            Temperature
-        </option>
-
-
-        <option value="humidity">
-            Humidity
-        </option>
-
-
-        <option value="windspeed">
-            Wind Speed
-        </option>
-
-
-        <option value="pressure">
-            Pressure
-        </option>
+    </div>
 
 
-    </select>
-
-
-
-    <button id="anomaly-btn">
-        Check Anomalies
+    <button class="btn" type="button" id="run-anomalies">
+        Detect
     </button>
 
 
-</div>
+</section>
 
 
 
-
-<div id="anomalies-summary" class="card">
-
-    Select a metric...
-
-</div>
+<div id="anomalies-summary"></div>
 
 
 
-<div id="anomalies-data" class="cards">
+<div id="anomalies-data" class="readouts"></div>
+
 
 </div>
 
 
-
-
-<script src="/static/js/anomalies.js"></script>
-
+<script src="/static/js/metrics.js?v={{ asset_version }}"></script>
+<script src="/static/js/anomalies.js?v={{ asset_version }}"></script>
 
 
 {% endblock %}
