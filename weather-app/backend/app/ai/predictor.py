@@ -1,9 +1,8 @@
 from sqlalchemy.orm import Session
-from sklearn.linear_model import LinearRegression
 import numpy as np
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 from ..models import Measurement
-
 
 
 def predict_weather(
@@ -11,7 +10,6 @@ def predict_weather(
     metric: str,
     future_step: int = 1
 ):
-
 
     records = (
         db.query(Measurement)
@@ -24,81 +22,61 @@ def predict_weather(
         .all()
     )
 
-
-
+    # Not enough data
     if len(records) < 5:
 
         return {
-
             "metric": metric,
-
             "prediction": None,
-
             "message": "Not enough data"
-
         }
 
-
-
+    # Get measurement values
     values = np.array(
         [
             r.value
             for r in records
-        ]
+        ],
+        dtype=float
     )
 
+    try:
 
+        # Holt Exponential Smoothing
+        model = ExponentialSmoothing(
+            values,
+            trend="add",
+            seasonal=None,
+            initialization_method="estimated"
+        )
 
-    X = np.arange(
-        len(values)
-    ).reshape(-1,1)
+        fitted_model = model.fit(
+            optimized=True
+        )
 
+        # Forecast
+        forecast = fitted_model.forecast(
+            future_step
+        )
 
-    y = values
-
-
-
-    model = LinearRegression()
-
-
-    model.fit(
-        X,
-        y
-    )
-
-
-
-    next_point = np.array(
-
-        [
-            [
-                len(values)
-                +
-                future_step
-            ]
+        prediction = forecast[
+            future_step - 1
         ]
 
-    )
+        return {
+            "metric": metric,
+            "prediction": round(
+                float(prediction),
+                2
+            ),
+            "model": "Holt Exponential Smoothing",
+            "trained_on": len(values)
+        }
 
+    except Exception as error:
 
-
-    prediction = model.predict(
-        next_point
-    )[0]
-
-
-
-    return {
-
-        "metric": metric,
-
-        "prediction":
-            round(float(prediction),2),
-
-        "model":
-            "Linear Regression",
-
-        "trained_on":
-            len(values)
-
-    }
+        return {
+            "metric": metric,
+            "prediction": None,
+            "message": f"Prediction error: {str(error)}"
+        }

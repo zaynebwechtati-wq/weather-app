@@ -10,18 +10,163 @@ History
 {% block content %}
 
 
-<h1>Weather History</h1>
+<div class="station">
 
 
-<div class="chart-container">
+<header class="masthead">
 
-    <canvas id="historyChart"></canvas>
+    <p class="eyebrow">
+        Historique
+        <span class="sep">·</span>
+        <span class="coords">mesures enregistrées</span>
+    </p>
+
+
+    <div class="masthead-row">
+
+        <h1>
+            Weather History
+        </h1>
+
+
+        <p class="sync">
+
+            <span class="dot live"></span>
+
+            <span id="history-status">
+                Loading...
+            </span>
+
+        </p>
+
+    </div>
+
+</header>
+
+
+
+<section class="query-panel">
+
+
+    <div class="field">
+
+        <span class="field-label">
+            Metric
+        </span>
+
+        <div class="metric-tabs" id="metric-tabs"></div>
+
+    </div>
+
+
+    <div class="field field--narrow">
+
+        <label class="field-label" for="limit">
+            Points
+        </label>
+
+        <input
+            class="field-input"
+            type="number"
+            id="limit"
+            min="1"
+            max="500"
+            value="30"
+        >
+
+    </div>
+
+
+    <button class="btn" type="button" id="run-history">
+        Load
+    </button>
+
+
+</section>
+
+
+
+<section class="stats" id="history-stats"></section>
+
+
+
+<section class="history">
+
+
+    <div class="history-head">
+
+        <h2 id="history-title">
+            History
+        </h2>
+
+        <p class="history-meta" id="history-meta">
+            --
+        </p>
+
+    </div>
+
+
+    <div class="chart-wrap">
+
+        <canvas id="historyChart"></canvas>
+
+    </div>
+
+
+    <p class="chart-fallback" id="chart-fallback"></p>
+
+
+</section>
+
+
+
+<section class="history">
+
+
+    <div class="history-head">
+
+        <h2>
+            Readings
+        </h2>
+
+        <p class="history-meta">
+            Newest first
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table class="readings-table">
+
+            <thead>
+                <tr>
+                    <th>Recorded at</th>
+                    <th class="num">Value</th>
+                    <th class="num">Change</th>
+                </tr>
+            </thead>
+
+            <tbody id="history-rows">
+                <tr>
+                    <td colspan="3" class="empty">Loading...</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</section>
+
 
 </div>
 
 
-
-<script src="/static/js/history.js"></script>
+<script src="/static/js/metrics.js?v={{ asset_version }}"></script>
+<script src="/static/js/history.js?v={{ asset_version }}"></script>
 
 
 {% endblock %}

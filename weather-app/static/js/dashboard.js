@@ -17,8 +17,16 @@ const pressureTime = document.getElementById("pressure-time");
 const refreshBtn = document.getElementById("refreshBtn");
 
 const chartCanvas = document.getElementById("tempChart");
+const chartTitle = document.getElementById("chart-title");
+const chartMeta = document.getElementById("chart-meta");
+const chartFallback = document.getElementById("chart-fallback");
+const chartTabs = document.getElementById("metric-tabs");
+const syncStatus = document.getElementById("sync-status");
 
 let chart = null;
+
+// which metric the history chart plots
+let chartMetric = "temperature";
 
 
 // ==========================
@@ -178,14 +186,53 @@ async function updateDashboard(){
 
 
 
+    await updateChart();
+
+
+    if(syncStatus){
+
+        syncStatus.textContent =
+            `Synchronisé à ${new Date().toLocaleTimeString()}`;
+
+    }
+
+}
+
+
+
+// ==========================
+// History chart
+// ==========================
+
+async function updateChart(){
+
+    const metric = getMetric(chartMetric);
+
+
     const history =
         await getHistory(
-            "temperature",
+            metric.key,
             20
         );
 
 
-    drawChart(history);
+    if(chartTitle){
+
+        chartTitle.textContent = `${metric.label} History`;
+
+    }
+
+
+    if(chartMeta){
+
+        chartMeta.textContent = history.length
+            ? `Last ${history.length} measurements`
+            : "No data";
+
+    }
+
+
+    drawChart(history, metric);
 
 }
 
@@ -195,7 +242,7 @@ async function updateDashboard(){
 // Draw chart
 // ==========================
 
-function drawChart(history){
+function drawChart(history, metric){
 
 
     if(!chartCanvas){
@@ -205,8 +252,34 @@ function drawChart(history){
     }
 
 
+    // Chart.js ships from a CDN — keep the readouts usable if it is unreachable
+    if(typeof Chart === "undefined"){
+
+        if(chartFallback){
+
+            chartFallback.textContent =
+                "Chart library unavailable — current readouts above are still live.";
+
+        }
+
+        return;
+
+    }
+
+
+    if(chartFallback){
+
+        chartFallback.textContent = "";
+
+    }
+
+
+    // API returns newest first — plot chronologically
+    const ordered = [...history].reverse();
+
+
     const labels =
-        history.map(item =>
+        ordered.map(item =>
             new Date(
                 item.recorded_at
             ).toLocaleTimeString()
@@ -214,7 +287,7 @@ function drawChart(history){
 
 
     const values =
-        history.map(
+        ordered.map(
             item => item.value
         );
 
@@ -225,6 +298,11 @@ function drawChart(history){
         chart.destroy();
 
     }
+
+
+    const accent = getComputedStyle(document.documentElement)
+        .getPropertyValue(metric.cssVar)
+        .trim() || "#E8712B";
 
 
 
@@ -243,15 +321,21 @@ function drawChart(history){
                     {
 
                         label:
-                        "Temperature °C",
+                        `${metric.label} (${metric.unit})`,
 
                         data:values,
 
-                        fill:false,
+                        borderColor: accent,
+
+                        backgroundColor: `${accent}22`,
+
+                        fill:true,
 
                         tension:0.3,
 
-                        borderWidth:2
+                        borderWidth:2,
+
+                        pointRadius:2
 
                     }
 
@@ -264,7 +348,15 @@ function drawChart(history){
 
                 responsive:true,
 
-                maintainAspectRatio:false
+                maintainAspectRatio:false,
+
+                plugins:{
+                    legend:{ display:false }
+                },
+
+                scales:{
+                    y:{ beginAtZero:false }
+                }
 
             }
 
@@ -285,6 +377,24 @@ if(refreshBtn){
     refreshBtn.addEventListener(
         "click",
         updateDashboard
+    );
+
+}
+
+
+// Chart metric selector
+if(chartTabs){
+
+    renderMetricTabs(
+        chartTabs,
+        chartMetric,
+        metric => {
+
+            chartMetric = metric;
+
+            updateChart();
+
+        }
     );
 
 }

@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from ..models import Measurement
+from ..utils.units import get_unit
 
 
 def get_forecast(
@@ -9,6 +10,9 @@ def get_forecast(
     metric: str,
     n_points: int = 5
 ):
+
+    metric = str(metric)
+
 
     records = (
         db.query(Measurement)
@@ -24,6 +28,10 @@ def get_forecast(
         return {
             "metric": metric,
             "forecast": None,
+            "unit": get_unit(metric),
+            "based_on": len(records),
+            "last_values": [],
+            "last_update": None,
             "message": "Not enough data"
         }
 
@@ -60,22 +68,3 @@ def get_forecast(
             last_measurement.recorded_at.isoformat()
 
     }
-
-
-
-def get_unit(metric):
-
-    units = {
-
-        "temperature": "°C",
-
-        "humidity": "%",
-
-        "windspeed": "km/h",
-
-        "pressure": "hPa"
-
-    }
-
-
-    return units.get(metric, "")

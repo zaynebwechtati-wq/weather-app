@@ -14,8 +14,10 @@ from .routers import weather
 from .routers import forecast
 from .routers import anomalies
 from .routers import health
+from .routers import logs
 from .routers import dashboard
 from .routers import ai
+
 
 # Project paths
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -35,6 +37,7 @@ app.include_router(weather.router)
 app.include_router(forecast.router)
 app.include_router(anomalies.router)
 app.include_router(health.router)
+app.include_router(logs.router)
 app.include_router(dashboard.router)
 app.include_router(ai.router)
 
@@ -60,6 +63,14 @@ templates = Jinja2Templates(
     directory=BASE_DIR / "templates"
 )
 print("Templates path:", BASE_DIR / "templates")
+
+
+# Static assets are versioned per process start so a restart always beats
+# the browser cache — a stale cached .js is otherwise indistinguishable
+# from a broken page.
+templates.env.globals["asset_version"] = str(
+    int(datetime.now().timestamp())
+)
 
 
 
@@ -119,6 +130,18 @@ def anomalies_page(request: Request):
         name="anomalies.html",
         context={}
     )
+
+
+@app.get("/logs-page")
+def logs_page(request: Request):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="logs.html",
+        context={}
+    )
+
+
 @app.get("/ai-page")
 def ai_page(request: Request):
 
@@ -127,6 +150,8 @@ def ai_page(request: Request):
         name="ai.html",
         context={}
     )
+
+
 @app.on_event("startup")
 def startup_event():
 

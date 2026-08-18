@@ -17,57 +17,47 @@ const pressureTime = document.getElementById("pressure-time");
 const refreshBtn = document.getElementById("refreshBtn");
 
 const chartCanvas = document.getElementById("tempChart");
+const chartTitle = document.getElementById("chart-title");
+const chartMeta = document.getElementById("chart-meta");
+const chartFallback = document.getElementById("chart-fallback");
+const metricTabs = document.getElementById("metric-tabs");
+
+const syncStatus = document.getElementById("sync-status");
 
 let chart = null;
+let selectedMetric = "temperature";
 
 
 // ==========================
 // Get Dashboard Data
 // ==========================
 
-async function getDashboardData(){
+async function getDashboardData() {
 
     try {
 
-        const response = await fetch(
-            "/dashboard"
-        );
+        const response = await fetch("/dashboard");
 
-
-        if(!response.ok){
-
-            console.error(
-                "Dashboard API error"
-            );
-
-            return null;
-
+        if (!response.ok) {
+            throw new Error(`Dashboard API error: ${response.status}`);
         }
-
 
         return await response.json();
 
-
-    } catch(error){
+    } catch (error) {
 
         console.error(error);
 
         return null;
-
     }
-
 }
-
 
 
 // ==========================
 // Get History
 // ==========================
 
-async function getHistory(
-    metric = "temperature",
-    limit = 20
-){
+async function getHistory(metric, limit = 20) {
 
     try {
 
@@ -75,45 +65,28 @@ async function getHistory(
             `/measurements?metric=${metric}&limit=${limit}`
         );
 
-
-        if(!response.ok){
-
-            return [];
-
+        if (!response.ok) {
+            throw new Error(`History API error: ${response.status}`);
         }
-
 
         return await response.json();
 
-
-    } catch(error){
+    } catch (error) {
 
         console.error(error);
 
         return [];
-
     }
+}
 
-}    
+
 // ==========================
-// Update Dashboard
+// Update Current Values
 // ==========================
 
-async function updateDashboard(){
+function updateReadouts(data) {
 
-
-    const data = await getDashboardData();
-
-
-    if(!data){
-
-        return;
-
-    }
-
-
-
-    if(data.temperature){
+    if (data.temperature) {
 
         tempValue.textContent =
             `${data.temperature.value} °C`;
@@ -122,12 +95,10 @@ async function updateDashboard(){
             new Date(
                 data.temperature.recorded_at
             ).toLocaleString();
-
     }
 
 
-
-    if(data.humidity){
+    if (data.humidity) {
 
         humidityValue.textContent =
             `${data.humidity.value} %`;
@@ -136,12 +107,10 @@ async function updateDashboard(){
             new Date(
                 data.humidity.recorded_at
             ).toLocaleString();
-
     }
 
 
-
-    if(data.windspeed){
+    if (data.windspeed) {
 
         windValue.textContent =
             `${data.windspeed.value} km/h`;
@@ -150,12 +119,10 @@ async function updateDashboard(){
             new Date(
                 data.windspeed.recorded_at
             ).toLocaleString();
-
     }
 
 
-
-    if(data.pressure){
+    if (data.pressure) {
 
         pressureValue.textContent =
             `${data.pressure.value} hPa`;
@@ -164,85 +131,121 @@ async function updateDashboard(){
             new Date(
                 data.pressure.recorded_at
             ).toLocaleString();
-
     }
-
-
-
-    const history =
-        await getHistory(
-            "temperature",
-            20
-        );
-
-
-    drawChart(history);
-
 }
 
+
+// ==========================
+// Metric Information
+// ==========================
+
+function getChartMetric(metric) {
+
+    const metrics = {
+
+        temperature: {
+            label: "Temperature",
+            unit: "°C"
+        },
+
+        humidity: {
+            label: "Humidity",
+            unit: "%"
+        },
+
+        windspeed: {
+            label: "Wind Speed",
+            unit: "km/h"
+        },
+
+        pressure: {
+            label: "Pressure",
+            unit: "hPa"
+        }
+
+    };
+
+    return metrics[metric] || metrics.temperature;
+}
 
 
 // ==========================
 // Draw Chart
 // ==========================
 
-function drawChart(history){
+function drawChart(history, metric) {
+
+    if (!chartCanvas) {
+        return;
+    }
+
+    const metricInfo =
+        getChartMetric(metric);
 
 
-    if(!chartCanvas){
+    if (!history || history.length === 0) {
+
+        if (chart) {
+            chart.destroy();
+            chart = null;
+        }
+
+        if (chartFallback) {
+            chartFallback.textContent =
+                "No data available.";
+        }
 
         return;
-
     }
 
 
-    const labels =
-        history.map(item =>
+    if (chartFallback) {
+        chartFallback.textContent = "";
+    }
+
+
+    const labels = history.map(
+        item =>
             new Date(
                 item.recorded_at
             ).toLocaleTimeString()
-        );
+    );
 
 
-    const values =
-        history.map(
-            item => item.value
-        );
+    const values = history.map(
+        item => item.value
+    );
 
 
-
-    if(chart){
-
+    if (chart) {
         chart.destroy();
-
     }
-
 
 
     chart = new Chart(
         chartCanvas,
         {
 
-            type:"line",
+            type: "line",
 
-            data:{
+            data: {
 
-                labels:labels,
+                labels: labels,
 
-                datasets:[
+                datasets: [
 
                     {
 
                         label:
-                        "Temperature °C",
+                            `${metricInfo.label} ${metricInfo.unit}`,
 
-                        data:values,
+                        data: values,
 
-                        fill:false,
+                        fill: false,
 
-                        tension:0.3,
+                        tension: 0.3,
 
-                        borderWidth:2
+                        borderWidth: 2
 
                     }
 
@@ -250,45 +253,147 @@ function drawChart(history){
 
             },
 
+            options: {
 
-            options:{
+                responsive: true,
 
-                responsive:true,
+                maintainAspectRatio: false,
 
-                maintainAspectRatio:false
+                scales: {
+
+                    y: {
+
+                        title: {
+
+                            display: true,
+
+                            text: metricInfo.unit
+
+                        }
+
+                    }
+
+                }
 
             }
 
         }
-
     );
 
+
+    if (chartTitle) {
+
+        chartTitle.textContent =
+            `${metricInfo.label} History`;
+    }
+
+
+    if (chartMeta) {
+
+        chartMeta.textContent =
+            `Last ${history.length} measurements`;
+    }
 }
 
 
+// ==========================
+// Update Chart
+// ==========================
+
+async function updateChart(metric) {
+
+    const history =
+        await getHistory(
+            metric,
+            20
+        );
+
+    drawChart(
+        history,
+        metric
+    );
+}
+
 
 // ==========================
-// Events
+// Update Dashboard
 // ==========================
 
-if(refreshBtn){
+async function updateDashboard() {
+
+    const data =
+        await getDashboardData();
+
+
+    if (!data) {
+
+        if (syncStatus) {
+            syncStatus.textContent =
+                "Erreur de synchronisation";
+        }
+
+        return;
+    }
+
+
+    updateReadouts(data);
+
+
+    await updateChart(
+        selectedMetric
+    );
+
+
+    if (syncStatus) {
+
+        syncStatus.textContent =
+            `Synchronisé à ${new Date().toLocaleTimeString()}`;
+    }
+}
+
+
+// ==========================
+// Metric Tabs
+// ==========================
+
+if (metricTabs) {
+
+    renderMetricTabs(
+        metricTabs,
+        selectedMetric,
+        async function(metric) {
+
+            selectedMetric = metric;
+
+            await updateChart(metric);
+        }
+    );
+}
+
+
+// ==========================
+// Refresh Button
+// ==========================
+
+if (refreshBtn) {
 
     refreshBtn.addEventListener(
         "click",
         updateDashboard
     );
-
 }
 
 
-
+// ==========================
 // First Load
+// ==========================
 
 updateDashboard();
 
 
-
+// ==========================
 // Auto Refresh
+// ==========================
 
 setInterval(
     updateDashboard,

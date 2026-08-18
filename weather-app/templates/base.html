@@ -14,7 +14,7 @@
         {% endblock %}
     </title>
 
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v={{ asset_version }}">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -26,46 +26,59 @@
 
 <nav class="navbar">
 
-    <div class="logo">
-        🌤 Weather Dashboard
-    </div>
+
+    <a class="logo" href="/">
+        <span class="logo-mark">🌤</span>
+        Station Météo
+    </a>
 
 
     <ul>
 
         <li>
-            <a href="/">
+            <a href="/"
+               {% if request.url.path == '/' %}class="active"{% endif %}>
                 Dashboard
             </a>
         </li>
 
 
         <li>
-            <a href="/forecast-page">
+            <a href="/forecast-page"
+               {% if request.url.path == '/forecast-page' %}class="active"{% endif %}>
                 Forecast
             </a>
         </li>
 
 
         <li>
-            <a href="/history-page">
+            <a href="/history-page"
+               {% if request.url.path == '/history-page' %}class="active"{% endif %}>
                 History
             </a>
         </li>
 
 
         <li>
-            <a href="/anomalies-page">
+            <a href="/anomalies-page"
+               {% if request.url.path == '/anomalies-page' %}class="active"{% endif %}>
                 Anomalies
             </a>
         </li>
         
         <li>
-    <a href="/ai-page">
-        AI Prediction
-    </a>
-</li>
+            <a href="/ai-page"
+               {% if request.url.path == '/ai-page' %}class="active"{% endif %}>
+                AI Prediction
+            </a>
+        </li>
 
+        <li>
+            <a href="/logs-page"
+               {% if request.url.path == '/logs-page' %}class="active"{% endif %}>
+                Logs
+            </a>
+        </li>
 
     </ul>
 
